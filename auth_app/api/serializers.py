@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model, authenticate
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -32,3 +33,35 @@ class RegistrationSerializer(serializers.ModelSerializer):
         account.set_password(pw)
         account.save()
         return account
+    
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+        username = User.objects.get(email=email).username
+
+        if email and password and username:
+            user = authenticate(request=self.context.get('request'),
+                                username=username, password=password)
+
+            # The authenticate call simply returns None for is_active=False
+            # users. (Assuming the default ModelBackend authentication
+            # backend.)
+            if not user:
+                msg = 'Unable to log in with provided credentials.'
+                raise serializers.ValidationError(msg, code='authorization')
+        else:
+            msg = 'Must include "username" and "password".'
+            raise serializers.ValidationError(msg, code='authorization')
+
+        attrs['user'] = user
+        return attrs
+
+
+
+
+
