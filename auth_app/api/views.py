@@ -10,14 +10,24 @@ from django.contrib.auth.models import User
 
 class RegistrationView(APIView):
     permission_classes = [AllowAny]
+    data = {}
 
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
+        
 
         if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'User created successfully.'})
-        return Response(serializer.errors)
+            user =  serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            data = {
+                    "token": token.key,
+                    "fullname": user.username,
+                    "email": user.email,
+                    "user_id": user.id
+                }
+        else:
+            data = serializer.errors
+        return Response(data)
     
 class LoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
