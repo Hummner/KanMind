@@ -64,6 +64,12 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+    
+class UserSerializer(serializers.ModelSerializer):
+    fullname = serializers.CharField(source= 'username')
+    class Meta:
+        model = User
+        fields = ['id', 'fullname', 'email']
 
 
 

@@ -1,9 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from boards.models import Boards
-from .serializers import BoardsSeralizer
+from .serializers import BoardsSeralizer, BoardDetailSerializer, BoardUpdateSerializer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.authentication import TokenAuthentication
+
 
 
 class BoardViewSet(viewsets.ModelViewSet):
@@ -11,6 +12,28 @@ class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardsSeralizer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+
+    def get_queryset(self):
+
+        if self.action == 'retrieve':
+            return Boards.objects.prefetch_related(
+                "tasks__assignee", "tasks__reviewer"
+            )
+
+        return Boards.objects.all()
+    
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action == "retrieve":
+            return BoardDetailSerializer
+        if self.action == "update":
+            return BoardUpdateSerializer
+        return BoardsSeralizer
+    
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    
 
     def perform_create(self, serializer):
         members = serializer.validated_data.get('members', [])
@@ -20,8 +43,5 @@ class BoardViewSet(viewsets.ModelViewSet):
             owner_id = self.request.user,
         )
 
-    def retrieve(self, request, *args, **kwargs):
-        
 
-        return super().retrieve(request, *args, **kwargs)
 
