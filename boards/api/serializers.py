@@ -34,17 +34,11 @@ class BoardUpdateSerializer(ModelSerializer):
     queryset = User.objects.all(),
     many=True,
     write_only = True,
-    source='members_data'
+    source="members_data"
     )
 
 
-    owner_data = UserSerializer(source= 'owner_id', read_only = True)
-    
-
-
-
-    
-
+    owner_data = UserSerializer(read_only = True)
     members_data = UserSerializer(many = True, read_only = True)
 
     def update(self, instance, validated_data):
@@ -52,11 +46,11 @@ class BoardUpdateSerializer(ModelSerializer):
         board = Boards.objects.get(pk=pk)
         owner_pk = board.owner_id_id
         owner = User.objects.get(pk=owner_pk)
-        instance.owner_id = owner
+        instance.owner_data = owner
 
         return super().update(instance, validated_data)
 
 
     class Meta:
         model = Boards
-        fields = ['id', 'title', 'owner_data', 'members_data']
+        fields = ['id', 'title', 'owner_data', 'members_data', 'members']

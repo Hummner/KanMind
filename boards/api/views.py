@@ -26,7 +26,8 @@ class BoardViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self, *args, **kwargs):
         if self.action == "retrieve":
             return BoardDetailSerializer
-        if self.action == "update":
+        if self.request.method in ("PUT", "PATCH"):
+            print('Yoo')
             return BoardUpdateSerializer
         return BoardsSeralizer
     

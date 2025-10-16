@@ -72,6 +72,32 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'fullname', 'email']
 
 
+class CheckUserEmial(serializers.Serializer):
+
+
+    email= serializers.EmailField()
+    id = serializers.PrimaryKeyRelatedField(read_only = True)
+    
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        user = User.objects.get(email=email)
+
+        if user:
+            user_fields = {
+                'email': email,
+                'fullname': user.username,
+                'id': user.id
+            }
+            return user_fields
+        else:
+            msg = "This user is not a member"
+            raise serializers.ValidationError(msg, code="unvalid_email")
+
+
+
+
+
 
 
 
