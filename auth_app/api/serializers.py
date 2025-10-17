@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model, authenticate
+from django.core.validators import validate_email
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -73,26 +74,30 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CheckUserEmial(serializers.Serializer):
-
-
     email= serializers.EmailField()
-    id = serializers.PrimaryKeyRelatedField(read_only = True)
-    
 
     def validate(self, attrs):
         email = attrs.get('email')
-        user = User.objects.get(email=email)
+        user = User.objects.filter(email=email).first()
 
-        if user:
-            user_fields = {
-                'email': email,
-                'fullname': user.username,
-                'id': user.id
-            }
-            return user_fields
-        else:
+        if not email:
+            msg = "This field is required"
+            raise serializers.ValidationError(msg, code="unvalid_email_adresse")
+        
+        try:
+            validate_email(email)
+        except:
+            msg = "Enter a valid email"
+            raise serializers.ValidationError(msg, code="unvalid_email")
+        
+        if not user:
             msg = "This user is not a member"
             raise serializers.ValidationError(msg, code="unvalid_email")
+        
+        attrs['user'] = user
+        return attrs
+        
+
 
 
 

@@ -7,6 +7,7 @@ from auth_app.api.serializers import UserSerializer
 
 
 
+
 class TasksSerializer(ModelSerializer):
 
     reviewer = UserSerializer(read_only=True)
@@ -24,13 +25,24 @@ class TasksSerializer(ModelSerializer):
         source="assignee"
     )
 
-
-
-
     class Meta:
         model = Tasks
         fields = '__all__'
         read_only_fields = ['id']
+
+
+class TasksAssignedUserSerializer(serializers.Serializer):
+
+    tasks = TasksSerializer(many=True, read_only =' True')
+
+    task_ids = serializers.PrimaryKeyRelatedField(
+        queryset= Tasks.objects.all(),
+        write_only = True,
+        source='tasks'
+    )
+
+    
+    
 
         
 

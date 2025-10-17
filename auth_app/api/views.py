@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
+from rest_framework import status
 
 
 
@@ -55,10 +56,23 @@ class UserEmailCheck(APIView):
 
 
     def get(self, request, *args, **kwargs):
-        email = self.kwargs.get('email')
-        serializer = CheckUserEmial(data={email:email})
+        email = request.query_params.get('email')
+        serializer = CheckUserEmial(data={'email':email})
+
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         if serializer.is_valid():
-            return Response(serializer)
-        else:
-            return serializer.error_messages
+            user = serializer.validated_data['user']
+            data = {
+                'id': user.id,
+                'email': user.email,
+                'fullname': user.username
+            }
+
+            return Response(data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+        
+        
+        
