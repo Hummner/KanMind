@@ -14,21 +14,9 @@ class TasksViewSet(ModelViewSet):
     serializer_class = TasksSerializer
 
         
-class TaskAssignedToUserView(APIView):
-    authentication_classes = [TokenAuthentication]
 
 
-    def get(self, request, *args, **kwargs):
-        user_pk = request.user.id
-        user = User.objects.get(pk=user_pk)
-        tasks = user.task_assignee.all().values('id')
-        sertialiezer = TasksAssignedUserSerializer(data={'tasks':tasks})
-        print(list(sertialiezer.data))
-        
-
-        return Response({"tasks": tasks})
-
-class UserList(ListCreateAPIView):
+class TaskAssignedToUserView(ListCreateAPIView):
         queryset = Tasks.objects.all()
         serializer_class = TasksSerializer
         authentication_classes = [TokenAuthentication]
@@ -37,6 +25,25 @@ class UserList(ListCreateAPIView):
             user_pk = self.request.user.id
             user = User.objects.get(pk=user_pk)
             tasks = user.task_assignee.all()
+            return tasks
+
+
+        def list(self, request):
+            queryset = self.get_queryset()
+            serializer = TasksSerializer(queryset, many=True)
+            return Response(serializer.data)
+        
+class TaskReviewerView(ListCreateAPIView):
+        queryset = Tasks.objects.all()
+        serializer_class = TasksSerializer
+        authentication_classes = [TokenAuthentication]
+
+        def get_queryset(self):
+            user_pk = self.request.user.id
+            print(self.request.get_full_path)
+            
+            user = User.objects.get(pk=user_pk)
+            tasks = user.task_reviewer.all()
             return tasks
 
 
