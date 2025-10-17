@@ -37,15 +37,11 @@ class UserList(ListCreateAPIView):
             user_pk = self.request.user.id
             user = User.objects.get(pk=user_pk)
             tasks = user.task_assignee.all()
-             
-
             return tasks
 
 
-
         def list(self, request):
-            # Note the use of `get_queryset()` instead of `self.queryset`
             queryset = self.get_queryset()
-            serializer = TasksAssignedUserSerializer(queryset, many=True)
+            serializer = TasksSerializer(queryset, many=True)
             return Response(serializer.data)
 
