@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from tasks.models import Tasks
+from tasks.models import Tasks, Comment
 from django.contrib.auth.models import User
 from auth_app.api.serializers import UserSerializer
 
@@ -40,8 +40,29 @@ class TasksAssignedUserSerializer(serializers.Serializer):
         write_only = True,
         source='tasks'
     )
+class AddCommentSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True)
+ 
+
+    class Meta:
+        model = Comment
+        fields= ['id', 'author', 'content', 'created_at']
+        read_only_fields = ['id', 'author', 'created_at']
 
     
+    def create(self, validated_data):
+        author = self.context['user']
+        task = self.context['task']
+        
+
+        return Comment.objects.create(author=author, task=task, **validated_data)
+    
+class CommentSerializer(serializers.ModelSerializer):
+        
+    class Meta:
+        model = Comment
+        fields= ['id', 'author', 'content', 'created_at']
+        read_only_fields = ['id', 'author', 'created_at', 'content']
     
 
         

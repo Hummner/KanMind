@@ -23,3 +23,10 @@ class Tasks(models.Model):
     due_date = models.DateField()
     comments_count = models.IntegerField(default=0)
     board = models.ForeignKey(Boards, on_delete=models.CASCADE, related_name='tasks')
+
+
+class Comment(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment_author')
+    content = models.CharField(max_length=1000)
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name='comments')
