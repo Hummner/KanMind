@@ -9,11 +9,26 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import serializers
+from boards.models import Boards
 
 class TasksViewSet(ModelViewSet):
     queryset = Tasks.objects.all()
     authentication_classes = [TokenAuthentication]
     serializer_class = TasksSerializer
+
+    def perform_create(self, serializer):
+         task = serializer.save()
+         board_id = task.board.id
+         baord = Boards.objects.get(pk=board_id)
+         baord.ticket_count += 1
+         
+         if task.priority == 'high':
+              baord.tasks_high_prio_count += 1
+              
+         if task.status == 'to-do':
+              baord.tasks_to_do_count += 1
+         baord.save() 
+         return super().perform_create(serializer)
 
     @action(detail=True, methods=['POST', 'GET'])
     def comments(self, request, pk):

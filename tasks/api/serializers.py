@@ -31,6 +31,8 @@ class TasksSerializer(ModelSerializer):
         read_only_fields = ['id']
 
 
+
+
 class TasksAssignedUserSerializer(serializers.Serializer):
 
     tasks = TasksSerializer(many=True, read_only =' True')

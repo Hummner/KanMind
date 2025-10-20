@@ -33,12 +33,10 @@ class BoardViewSet(viewsets.ModelViewSet):
     
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
-
     
 
     def perform_create(self, serializer):
         members = serializer.validated_data.get('members', [])
-        print(self.request.user)
         serializer.save(
             member_count = len(members),
             owner_id = self.request.user,

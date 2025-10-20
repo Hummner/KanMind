@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework import serializers
 from boards.models import Boards
 from tasks.api.serializers import TasksSerializer
 from auth_app.api.serializers import UserSerializer
@@ -6,7 +7,6 @@ from django.contrib.auth.models import User
 
 
 class BoardsSeralizer(ModelSerializer):
-   
 
     members = PrimaryKeyRelatedField(
         queryset = User.objects.all(),
@@ -17,6 +17,8 @@ class BoardsSeralizer(ModelSerializer):
         model = Boards
         fields = ['id', 'title', 'member_count', 'ticket_count', 'tasks_to_do_count', 'tasks_high_prio_count', 'owner_id', 'members']
         read_only_fields = ('id', 'member_count','ticket_count', 'tasks_to_do_count', 'tasks_high_prio_count', 'owner_id')
+
+
 
 class BoardDetailSerializer(ModelSerializer):
 
