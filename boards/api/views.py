@@ -33,35 +33,4 @@ class BoardViewSet(viewsets.ModelViewSet):
     
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
-    
-    def list(self, request, *args, **kwargs):
-        
-
-        data = []
-        for board in Boards.objects.all():
-            tasks = board.tasks.all()
-            ticket_count = len(tasks)
-            tasks_to_do_count = len(board.tasks.filter(status='to-do'))
-            tasks_high_prio_count = len(board.tasks.filter(priority='high'))
-            members_count = board.members.count()
-
-            data.append({
-                'id': board.id,
-                'title': board.title,
-                'ticker_count': ticket_count,
-                'tasks_to_do_count': tasks_to_do_count,
-                'tasks_high_prio_count' :tasks_high_prio_count,
-                'members_count': members_count
-            })
-        return Response(data)
-    
-
-    def perform_create(self, serializer):
-        members = serializer.validated_data.get('members', [])
-        serializer.save(
-            member_count = len(members),
-            owner_id = self.request.user,
-        )
-
-
 

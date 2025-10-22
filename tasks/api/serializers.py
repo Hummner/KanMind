@@ -25,10 +25,15 @@ class TasksSerializer(ModelSerializer):
         source="assignee"
     )
 
+    comments_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Tasks
         fields = '__all__'
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'comments_count']
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
 
 
 

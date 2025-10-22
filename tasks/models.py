@@ -21,7 +21,6 @@ class Tasks(models.Model):
     assignee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_assignee', null=True)
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_reviewer', null=True)
     due_date = models.DateField()
-    comments_count = models.IntegerField(default=0)
     board = models.ForeignKey(Boards, on_delete=models.CASCADE, related_name='tasks')
 
 

@@ -16,52 +16,8 @@ class TasksViewSet(ModelViewSet):
     authentication_classes = [TokenAuthentication]
     serializer_class = TasksSerializer
 
-    def perform_create(self, serializer):
-         task = serializer.save()
-         board_id = task.board.id
-         baord = Boards.objects.get(pk=board_id)
-         baord.ticket_count += 1
-         
-         if task.priority == 'high':
-              baord.tasks_high_prio_count += 1
-              
-         if task.status == 'to-do':
-              baord.tasks_to_do_count += 1
-         baord.save() 
-         return super().perform_create(serializer)
-    
-    def perform_destroy(self, instance):
-         task = instance
-         board_id = task.board.id
-         baord = Boards.objects.get(pk=board_id)
-         baord.ticket_count -= 1
-         
-         if task.priority == 'high':
-              baord.tasks_high_prio_count -= 1
-              
-         if task.status == 'to-do':
-              baord.tasks_to_do_count -= 1
-         baord.save() 
-         return super().perform_destroy(instance)
-    
-    def perform_create_comments(self, serializer, pk):
-         task = Tasks.objects.get(pk=pk)
-         comment_count = task.comments_count
-         comment_count += 1
-         task.save()
-
-    def perform_destroy_comments(self, pk):
-         task = Tasks.objects.get(pk=pk)
-         comment_count = task.comments_count
-         comment_count -= 1
-         task.save()
-
     @action(detail=True, methods=['POST', 'GET', 'DELETE'])
     def comments(self, request, pk):
-
-
-
-
         if request.method == 'POST':
             user_pk = self.request.user.id
             user = User.objects.get(pk=user_pk)
@@ -70,9 +26,6 @@ class TasksViewSet(ModelViewSet):
 
             if serializer.is_valid():
                 serializer.save()
-                self.perform_create_comments(serializer, pk)
-                
-                
             else:
                 raise serializers.ValidationError(serializer.errors)
 
@@ -81,8 +34,6 @@ class TasksViewSet(ModelViewSet):
             task = self.get_object()
             comments = task.comments.all()
             serializer = CommentSerializer(comments, many=True)
-            if request.method == 'DELETE':
-                 self.perform_destroy_comments(pk)
             return Response(serializer.data)
     
     
@@ -150,4 +101,5 @@ class CommentsView(ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+
         return Response(serializer.data)
