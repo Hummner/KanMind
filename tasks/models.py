@@ -10,7 +10,7 @@ class Tasks(models.Model):
     
     class Status(models.TextChoices):
         TODO = "to-do"
-        INPROGRESS = "`in-progress"
+        INPROGRESS = "in-progress"
         REVIEW = "review"
         DONE = "done"
 
