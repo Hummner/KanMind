@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView
-from tasks.models import Tasks
+from tasks.models import Tasks, Comment
 from rest_framework.authentication import TokenAuthentication
 from .serializers import TasksSerializer, TasksAssignedUserSerializer, AddCommentSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -16,25 +16,25 @@ class TasksViewSet(ModelViewSet):
     authentication_classes = [TokenAuthentication]
     serializer_class = TasksSerializer
 
-    @action(detail=True, methods=['POST', 'GET', 'DELETE'])
-    def comments(self, request, pk):
-        if request.method == 'POST':
-            user_pk = self.request.user.id
-            user = User.objects.get(pk=user_pk)
-            task = self.get_object()
-            serializer = AddCommentSerializer(data=request.data, context={'request': request, 'user':user, 'task':task})
+    # @action(detail=True, methods=['POST', 'GET', 'DELETE'])
+    # def comments(self, request, pk):
+    #     if request.method == 'POST':
+    #         user_pk = self.request.user.id
+    #         user = User.objects.get(pk=user_pk)
+    #         task = self.get_object()
+    #         serializer = AddCommentSerializer(data=request.data, context={'request': request, 'user':user, 'task':task})
 
-            if serializer.is_valid():
-                serializer.save()
-            else:
-                raise serializers.ValidationError(serializer.errors)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #         else:
+    #             raise serializers.ValidationError(serializer.errors)
 
-            return Response(serializer.data)
-        else: 
-            task = self.get_object()
-            comments = task.comments.all()
-            serializer = CommentSerializer(comments, many=True)
-            return Response(serializer.data)
+    #         return Response(serializer.data)
+    #     else: 
+    #         task = self.get_object()
+    #         comments = task.comments.all()
+    #         serializer = CommentSerializer(comments, many=True)
+    #         return Response(serializer.data)
     
     
 
@@ -84,22 +84,22 @@ class TaskReviewerView(ListCreateAPIView):
         
 
 class CommentsView(ModelViewSet):
+     queryset = Comment.objects.all()
+     serializer_class = CommentSerializer
+     authentication_classes = [TokenAuthentication]
 
-    def get_queryset(self):
-         user_pk = self.request.user.id
-         user = User.objects.get(pk=user_pk)
+     def create(self, request, *args, **kwargs):
+        user_pk = self.request.user.id
+        user = User.objects.get(pk=user_pk)
+        task_pk = int(kwargs.get('task_pk'))
+        task = Tasks.objects.get(pk=task_pk)
+        serializer = AddCommentSerializer(data=request.data, context={'request': request, 'user':user, 'task':task})
 
-         return super().get_queryset()
-         
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
+        if serializer.is_valid():
+                serializer.save()
+        else:
+            raise serializers.ValidationError(serializer.errors)
 
         return Response(serializer.data)
+
+
