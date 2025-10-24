@@ -4,15 +4,14 @@ from boards.models import Boards
 
 class IsBoardOwnerOrMember(permissions.BasePermission):
 
-    def has_permission(self, request, view):
+    def has_object_permission(self, request, view, obj):
         
 
         user = request.user
-        is_owner = user.owner_board.get(pk=user.id)
-        is_member = user.members_board.get(pk=user.id)
+        is_owner = obj.owner == user
+        is_member = obj.members.filter(pk=user.id).exists()
 
-        if is_owner and is_member:
-            return True
+    
 
 
-        return False
+        return is_owner or is_member

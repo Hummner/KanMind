@@ -13,7 +13,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     queryset = Boards.objects.all()
     serializer_class = BoardsSeralizer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsBoardOwnerOrMember]
 
 
     def get_queryset(self):
@@ -29,6 +29,12 @@ class BoardViewSet(viewsets.ModelViewSet):
         return Boards.objects.filter(
             Q(owner=user) | Q(members=user)
         ).distinct()
+    
+    # def get_permissions(self):
+    #     if self.request.method in ('GET') and self.action == 'retrieve':
+    #         return [IsAuthenticated, IsBoardOwnerOrMember]
+
+    #     return [IsAuthenticated]
 
     
     def get_serializer_class(self, *args, **kwargs):
