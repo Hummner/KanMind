@@ -36,10 +36,11 @@ class TaskAssignedToUserView(ListCreateAPIView):
         permission_classes = [IsAuthenticated, IsMember]
 
         def get_queryset(self):
-            user_pk = self.request.user.id
-            user = User.objects.get(pk=user_pk)
-            tasks = user.task_assignee.all()
-            return tasks
+          user = self.request.user
+          print(user.task_assignee.all())
+          tasks = user.task_assignee.select_related("assignee")
+          print(tasks)
+          return tasks
 
 
         def list(self, request):
