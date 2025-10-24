@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import RegistrationSerializer, LoginSerializer, CheckUserEmial
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -53,6 +53,7 @@ class LoginView(ObtainAuthToken):
         return Response(data)
     
 class UserEmailCheck(APIView):
+    permission_classes = [IsAuthenticated]
 
 
     def get(self, request, *args, **kwargs):
