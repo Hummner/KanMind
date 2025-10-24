@@ -4,6 +4,8 @@ from boards.models import Boards
 from .serializers import BoardsSeralizer, BoardDetailSerializer, BoardUpdateSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from .permissions import IsBoardOwnerOrMember
+from django.db.models import Q
 
 
 
@@ -20,8 +22,14 @@ class BoardViewSet(viewsets.ModelViewSet):
             return Boards.objects.prefetch_related(
                 "tasks__assignee", "tasks__reviewer"
             )
+        
+        if self.action == 'list':
+            user = self.request.user
 
-        return Boards.objects.all()
+        return Boards.objects.filter(
+            Q(owner=user) | Q(members=user)
+        ).distinct()
+
     
     def get_serializer_class(self, *args, **kwargs):
         if self.action == "retrieve":
