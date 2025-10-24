@@ -27,6 +27,8 @@ class TasksSerializer(ModelSerializer):
 
     comments_count = serializers.SerializerMethodField()
 
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Tasks
         fields = '__all__'

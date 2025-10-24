@@ -10,46 +10,30 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import serializers
 from boards.models import Boards
+from .permissions import IsMember, IsTaskOrBoardOwner, IsCommentAuthor
+from django.shortcuts import get_object_or_404
+
 
 class TasksViewSet(ModelViewSet):
     queryset = Tasks.objects.all()
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsMember]
     serializer_class = TasksSerializer
 
-    # @action(detail=True, methods=['POST', 'GET', 'DELETE'])
-    # def comments(self, request, pk):
-    #     if request.method == 'POST':
-    #         user_pk = self.request.user.id
-    #         user = User.objects.get(pk=user_pk)
-    #         task = self.get_object()
-    #         serializer = AddCommentSerializer(data=request.data, context={'request': request, 'user':user, 'task':task})
 
-    #         if serializer.is_valid():
-    #             serializer.save()
-    #         else:
-    #             raise serializers.ValidationError(serializer.errors)
+    def get_permissions(self):
+         if self.request.method == "DELETE":
+              return [IsTaskOrBoardOwner()]
 
-    #         return Response(serializer.data)
-    #     else: 
-    #         task = self.get_object()
-    #         comments = task.comments.all()
-    #         serializer = CommentSerializer(comments, many=True)
-    #         return Response(serializer.data)
-    
-    
+         return super().get_permissions()
 
-       
-
-        
-
-
-        
-
+  
 
 class TaskAssignedToUserView(ListCreateAPIView):
         queryset = Tasks.objects.all()
         serializer_class = TasksSerializer
         authentication_classes = [TokenAuthentication]
+        permission_classes = [IsAuthenticated, IsMember]
 
         def get_queryset(self):
             user_pk = self.request.user.id
@@ -67,10 +51,10 @@ class TaskReviewerView(ListCreateAPIView):
         queryset = Tasks.objects.all()
         serializer_class = TasksSerializer
         authentication_classes = [TokenAuthentication]
+        permission_classes = [IsAuthenticated, IsMember]
 
         def get_queryset(self):
             user_pk = self.request.user.id
-            print(self.request.get_full_path)
             
             user = User.objects.get(pk=user_pk)
             tasks = user.task_reviewer.all()
@@ -87,12 +71,29 @@ class CommentsView(ModelViewSet):
      queryset = Comment.objects.all()
      serializer_class = CommentSerializer
      authentication_classes = [TokenAuthentication]
+     permission_classes = [IsAuthenticated, IsMember]
+
+
+     def get_task(self):
+        task_pk = int(self.kwargs.get('task_pk'))
+        task = get_object_or_404(Tasks, pk=task_pk)
+        return task
+
+
+     def get_permissions(self):
+          if self.request.method == 'DELETE':
+               return [IsCommentAuthor()]
+
+          return super().get_permissions()
+     
+     def get_queryset(self):
+          task = self.get_task()
+          return Comment.objects.filter(task = task)
 
      def create(self, request, *args, **kwargs):
         user_pk = self.request.user.id
         user = User.objects.get(pk=user_pk)
-        task_pk = int(kwargs.get('task_pk'))
-        task = Tasks.objects.get(pk=task_pk)
+        task = self.get_task()
         serializer = AddCommentSerializer(data=request.data, context={'request': request, 'user':user, 'task':task})
 
         if serializer.is_valid():
