@@ -78,7 +78,6 @@ class BoardUpdateSerializer(ModelSerializer):
 
         return super().update(instance, validated_data)
 
-
     class Meta:
         model = Boards
         fields = ['id', 'title', 'owner_data', 'members_data', 'members']

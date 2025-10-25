@@ -27,15 +27,23 @@ class TasksSerializer(ModelSerializer):
 
     comments_count = serializers.SerializerMethodField()
 
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    # owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Tasks
         fields = '__all__'
-        read_only_fields = ['id', 'comments_count']
+        read_only_fields = ['id', 'comments_count, owner']
 
     def get_comments_count(self, obj):
         return obj.comments.count()
+    
+    def create(self, validated_data):
+        validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        validated_data.pop('comments_count')
+        return super().update(instance, validated_data)
 
 
 class AddCommentSerializer(serializers.ModelSerializer):

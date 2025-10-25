@@ -45,6 +45,11 @@ class BoardViewSet(viewsets.ModelViewSet):
             return BoardUpdateSerializer
         return BoardsSeralizer
     
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        members = serializer.validated_data.get('members_data')
+
+        serializer.instance.members.set(members)
+        return super().perform_update(serializer)
+    
+
 
