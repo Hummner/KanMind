@@ -30,42 +30,24 @@ class TasksViewSet(ModelViewSet):
   
 
 class TaskAssignedToUserView(ListCreateAPIView):
-        queryset = Tasks.objects.all()
         serializer_class = TasksSerializer
         authentication_classes = [TokenAuthentication]
         permission_classes = [IsAuthenticated, IsMember]
 
         def get_queryset(self):
           user = self.request.user
-          print(user.task_assignee.all())
-          tasks = user.task_assignee.select_related("assignee")
-          print(tasks)
+          tasks = user.task_assignee.select_related("assignee", "reviewer")
           return tasks
-
-
-        def list(self, request):
-            queryset = self.get_queryset()
-            serializer = TasksSerializer(queryset, many=True)
-            return Response(serializer.data)
         
 class TaskReviewerView(ListCreateAPIView):
-        queryset = Tasks.objects.all()
         serializer_class = TasksSerializer
         authentication_classes = [TokenAuthentication]
         permission_classes = [IsAuthenticated, IsMember]
 
         def get_queryset(self):
-            user_pk = self.request.user.id
-            
-            user = User.objects.get(pk=user_pk)
-            tasks = user.task_reviewer.all()
+            user= self.request.user
+            tasks = user.task_reviewer.select_related("assignee", "reviewer")
             return tasks
-
-
-        def list(self, request):
-            queryset = self.get_queryset()
-            serializer = TasksSerializer(queryset, many=True)
-            return Response(serializer.data)
         
 
 class CommentsView(ModelViewSet):
