@@ -3,7 +3,7 @@ from rest_framework import serializers
 from tasks.models import Tasks, Comment
 from django.contrib.auth.models import User
 from auth_app.api.serializers import UserSerializer
-
+from boards.models import Boards
 
 
 
@@ -27,23 +27,56 @@ class TasksSerializer(ModelSerializer):
 
     comments_count = serializers.SerializerMethodField()
 
-    # owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    # owner = serializers.HiddenField()
 
     class Meta:
         model = Tasks
-        fields = '__all__'
-        read_only_fields = ['id', 'comments_count, owner']
+        fields = ['id', 'board', 'title', 'description', 'status', 'priority', 'assignee', 'reviewer', 'due_date', 'comments_count', 'assignee_id', 'reviewer_id']
+        read_only_fields = ['id', 'comments_count']
 
     def get_comments_count(self, obj):
         return obj.comments.count()
     
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
+
         return super().create(validated_data)
     
-    def update(self, instance, validated_data):
-        validated_data.pop('comments_count')
-        return super().update(instance, validated_data)
+    def to_representation(self, instance):
+         rep = super().to_representation(instance)
+         request = self.context.get('request')
+         
+         if request.method == "PATCH":
+              rep.pop('comments_count')
+
+         return rep
+    
+    def get_board_from_request(self):
+        request = self.context.get("request")
+        board_id = None
+
+        if request:
+            board_id = request.data.get("board")  # POST/PATCH ha küldve van
+
+        if not board_id and self.instance:
+            return getattr(self.instance, "board", None)
+
+        if board_id:
+            return Boards.objects.filter(pk=board_id).first()
+
+        return None
+
+    def validate_reviewer_id(self, value):
+        board = self.get_board_from_request()
+        user = value
+        is_member = user.members_board.get(board=board.id)
+
+        if not board.members.filter(pk=value.pk).exists():
+            raise serializers.ValidationError("Reviewer must be members in Board")
+        
+        return value
+
+              
 
 
 class AddCommentSerializer(serializers.ModelSerializer):
