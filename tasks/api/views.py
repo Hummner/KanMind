@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView
 from tasks.models import Tasks, Comment
 from rest_framework.authentication import TokenAuthentication
-from .serializers import TasksSerializer, TasksAssignedUserSerializer, AddCommentSerializer, CommentSerializer
+from .serializers import TasksSerializer, AddCommentSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework.response import Response
@@ -71,11 +71,10 @@ class CommentsView(ModelViewSet):
      
      def get_queryset(self):
           task = self.get_task()
-          return Comment.objects.filter(task = task)
+          return Comment.objects.filter(task = task).order_by('-created_at')
 
      def create(self, request, *args, **kwargs):
-        user_pk = self.request.user.id
-        user = User.objects.get(pk=user_pk)
+        user = self.request.user
         task = self.get_task()
         serializer = AddCommentSerializer(data=request.data, context={'request': request, 'user':user, 'task':task})
 

@@ -38,19 +38,9 @@ class TasksSerializer(ModelSerializer):
         return obj.comments.count()
 
 
-
-
-class TasksAssignedUserSerializer(serializers.Serializer):
-
-    tasks = TasksSerializer(many=True, read_only =' True')
-
-    task_ids = serializers.PrimaryKeyRelatedField(
-        queryset= Tasks.objects.all(),
-        write_only = True,
-        source='tasks'
-    )
 class AddCommentSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
+    author = serializers.StringRelatedField()
  
 
     class Meta:

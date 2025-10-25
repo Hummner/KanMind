@@ -30,3 +30,7 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment_author')
     content = models.CharField(max_length=1000)
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name='comments')
+
+
+    def __str__(self):
+        return self.author.username
