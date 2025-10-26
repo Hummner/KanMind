@@ -27,8 +27,6 @@ class TasksSerializer(ModelSerializer):
 
     comments_count = serializers.SerializerMethodField()
 
-    # owner = serializers.HiddenField()
-
     class Meta:
         model = Tasks
         fields = ['id', 'board', 'title', 'description', 'status', 'priority', 'assignee', 'reviewer', 'due_date', 'comments_count', 'assignee_id', 'reviewer_id']
@@ -52,29 +50,39 @@ class TasksSerializer(ModelSerializer):
          return rep
     
     def get_board_from_request(self):
-        request = self.context.get("request")
-        board_id = None
 
-        if request:
-            board_id = request.data.get("board")  # POST/PATCH ha küldve van
+        request = self.context.get('request')
+        board = None
 
-        if not board_id and self.instance:
-            return getattr(self.instance, "board", None)
+        if request.method == 'POST':
+            board_id = request.data['board']
+            board = Boards.objects.get(pk=board_id)
 
-        if board_id:
-            return Boards.objects.filter(pk=board_id).first()
+        if request.method == 'PATCH':
+            board = self.instance.board
 
-        return None
-
-    def validate_reviewer_id(self, value):
+        return board
+     
+    
+    def validate(self, attrs):
         board = self.get_board_from_request()
-        user = value
-        is_member = user.members_board.get(board=board.id)
+        reviewer = attrs.get('reviewer')
+        assignee = attrs.get('assignee')
 
-        if not board.members.filter(pk=value.pk).exists():
-            raise serializers.ValidationError("Reviewer must be members in Board")
+        if not board.members.filter(pk=reviewer.id).exists():
+            raise serializers.ValidationError('The reviewer must be a board member.')
         
-        return value
+        if not board.members.filter(pk=assignee.id).exists():
+            raise serializers.ValidationError('The assignee must be a board member.')
+
+        return attrs
+    
+    def update(self, instance, validated_data):
+        board = validated_data.get('board', None)
+
+        if board:
+            raise serializers.ValidationError('Board can not change')
+        return super().update(instance, validated_data)
 
               
 
