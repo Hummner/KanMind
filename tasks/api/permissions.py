@@ -2,6 +2,9 @@ from rest_framework import permissions
 
 
 class IsMember(permissions.BasePermission):
+    """
+    Permission class that grants access only if the requesting user is a member of a board.
+    """
 
 
     def has_permission(self, request, view):
@@ -11,6 +14,9 @@ class IsMember(permissions.BasePermission):
         return is_member
     
 class IsTaskOrBoardOwner(permissions.BasePermission):
+    """
+    Permission class that allows access if the user is either the task owner or the board owner.
+    """
 
     def has_object_permission(self, request, view, obj):
         user = request.user
@@ -21,6 +27,9 @@ class IsTaskOrBoardOwner(permissions.BasePermission):
 
 
 class IsCommentAuthor(permissions.BasePermission):
+    """
+    Permission class that allows access only if the user is the author of the comment.
+    """
 
     def has_object_permission(self, request, view, obj):
         user = request.user

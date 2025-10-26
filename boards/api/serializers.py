@@ -8,6 +8,10 @@ from tasks.models import Tasks
 
 
 class BoardsSeralizer(ModelSerializer):
+    """
+    Serializer for creating and listing boards.
+    Includes ticket, member, and task statistics.
+    """
 
     members = PrimaryKeyRelatedField(
         queryset = User.objects.all(),
@@ -46,6 +50,9 @@ class BoardsSeralizer(ModelSerializer):
 
 
 class BoardDetailSerializer(ModelSerializer):
+    """
+    Serializer for detailed board view including related members and tasks.
+    """
 
     tasks = TasksSerializer(many=True, read_only = True)
 
@@ -57,6 +64,9 @@ class BoardDetailSerializer(ModelSerializer):
 
 
 class BoardUpdateSerializer(ModelSerializer):
+    """
+    Serializer for updating board details, including members and owner info.
+    """
 
     members = PrimaryKeyRelatedField(
         queryset = User.objects.all(),
@@ -70,6 +80,9 @@ class BoardUpdateSerializer(ModelSerializer):
     members_data = UserSerializer(many = True, read_only = True)
 
     def update(self, instance, validated_data):
+        """
+        Ensures owner information is preserved during board update.
+        """
         pk = instance.pk
         board = Boards.objects.get(pk=pk)
         owner_pk = board.owner.id

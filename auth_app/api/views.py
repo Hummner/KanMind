@@ -10,6 +10,9 @@ from rest_framework import status
 
 
 class RegistrationView(APIView):
+    """
+    Handles user registration and returns an authentication token along with user information.
+    """
     permission_classes = [AllowAny]
     data = {}
 
@@ -31,6 +34,9 @@ class RegistrationView(APIView):
         return Response(data)
     
 class LoginView(ObtainAuthToken):
+    """
+    Handles user login and returns an authentication token along with user information.
+    """
     permission_classes = [AllowAny]
 
     data = {}
@@ -53,6 +59,10 @@ class LoginView(ObtainAuthToken):
         return Response(data)
     
 class UserEmailCheck(APIView):
+    """
+    Checks if a user with the given email exists and returns their basic information.
+    Requires authentication.
+    """
     permission_classes = [IsAuthenticated]
 
 

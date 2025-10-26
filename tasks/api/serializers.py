@@ -36,11 +36,17 @@ class TasksSerializer(ModelSerializer):
         return obj.comments.count()
     
     def create(self, validated_data):
+        """
+        Sets the task owner to the current user before creating the task.
+        """
         validated_data['owner'] = self.context['request'].user
 
         return super().create(validated_data)
     
     def to_representation(self, instance):
+         """
+         Customizes the serialized output by removing 'comments_count' during PATCH requests.
+         """
          rep = super().to_representation(instance)
          request = self.context.get('request')
          
@@ -50,6 +56,12 @@ class TasksSerializer(ModelSerializer):
          return rep
     
     def get_board_from_request(self):
+        """
+        Returns the Board object based on the request method.
+
+        POST: gets board from request data.
+        PATCH: uses the instance's board.
+        """
 
         request = self.context.get('request')
         board = None
@@ -65,6 +77,9 @@ class TasksSerializer(ModelSerializer):
      
     
     def validate(self, attrs):
+        """
+        Validates that reviewer and assignee are members of the board.
+        """
         board = self.get_board_from_request()
         reviewer = attrs.get('reviewer')
         assignee = attrs.get('assignee')
@@ -78,6 +93,10 @@ class TasksSerializer(ModelSerializer):
         return attrs
     
     def update(self, instance, validated_data):
+        """
+        Prevents changing the board during update and delegates the rest to the parent update method.
+        """
+
         board = validated_data.get('board', None)
 
         if board:
@@ -99,10 +118,12 @@ class AddCommentSerializer(serializers.ModelSerializer):
 
     
     def create(self, validated_data):
+        """
+        Creates a new comment and assigns the author and task from the serializer context.
+        """
         author = self.context['user']
         task = self.context['task']
         
-
         return Comment.objects.create(author=author, task=task, **validated_data)
     
 class CommentSerializer(serializers.ModelSerializer):

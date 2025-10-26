@@ -10,12 +10,21 @@ from django.db.models import Q
 
 
 class BoardViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing boards.
+    Provides different serializers and permissions depending on the request type and action.
+    """
     queryset = Boards.objects.all()
     serializer_class = BoardsSeralizer
     authentication_classes = [TokenAuthentication]
 
 
     def get_queryset(self):
+        """
+        Returns the queryset of boards.
+        For 'retrieve' action, it prefetches related tasks and users.
+        Otherwise, returns boards where the user is owner or member.
+        """
         user = self.request.user
 
         if self.action == 'retrieve':
@@ -29,6 +38,12 @@ class BoardViewSet(viewsets.ModelViewSet):
         
     
     def get_permissions(self):
+        """
+        Applies permission rules based on the request method:
+        - POST: any authenticated user
+        - DELETE: only board owner
+        - Other: board owner or member
+        """
         if self.request.method == 'POST':
             return [IsAuthenticated()]
         
@@ -39,6 +54,12 @@ class BoardViewSet(viewsets.ModelViewSet):
 
     
     def get_serializer_class(self, *args, **kwargs):
+        """
+        Chooses the appropriate serializer class depending on the action:
+        - retrieve → BoardDetailSerializer
+        - update/patch → BoardUpdateSerializer
+        - default → BoardsSerializer
+        """
         if self.action == "retrieve":
             return BoardDetailSerializer
         if self.request.method in ("PUT", "PATCH"):
@@ -46,6 +67,9 @@ class BoardViewSet(viewsets.ModelViewSet):
         return BoardsSeralizer
     
     def perform_update(self, serializer):
+        """
+        Updates the board's member list when performing an update.
+        """
         members = serializer.validated_data.get('members_data')
 
         serializer.instance.members.set(members)

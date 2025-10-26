@@ -3,6 +3,9 @@ from boards.models import Boards
 
 
 class IsBoardOwnerOrMember(permissions.BasePermission):
+    """
+    Permission class that allows access if the user is either the board owner or a board member.
+    """
     def has_object_permission(self, request, view, obj):
         user = request.user
         is_owner = obj.owner == user
@@ -12,6 +15,9 @@ class IsBoardOwnerOrMember(permissions.BasePermission):
     
 
 class IsBoardOwner(permissions.BasePermission):
+    """
+    Permission class that allows access only if the user is the board owner.
+    """
     def has_object_permission(self, request, view, obj):
         user = request.user
         is_owner = obj.owner == user

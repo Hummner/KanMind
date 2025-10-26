@@ -5,6 +5,9 @@ from django.core.validators import validate_email
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for registering new users with email, password, and repeated password.
+    """
 
     repeated_password = serializers.CharField(write_only = True)
     fullname = serializers.CharField(source= 'username')
@@ -19,17 +22,26 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def validate_email(self, value):
+        """
+        Ensures the email address is unique across users.
+        """
         if User.objects.filter(email = value).exists():
             raise serializers.ValidationError('Email already exists')
         return value
     
     def validate_fullname(self, value):
+        """
+        Ensures the username (fullname) is unique across users.
+        """
         if User.objects.filter(username = value).exists():
             raise serializers.ValidationError('Username already exists')
         return value
     
 
     def save(self, **kwargs):
+        """
+        Creates a new user after verifying that both password fields match.
+        """
         pw = self.validated_data['password']
         repeated_password = self.validated_data['repeated_password']
 
@@ -44,10 +56,16 @@ class RegistrationSerializer(serializers.ModelSerializer):
     
 
 class LoginSerializer(serializers.Serializer):
+    """
+    Serializer for authenticating a user using email and password.
+    """
     email = serializers.EmailField()
     password = serializers.CharField()
     
     def validate(self, attrs):
+        """
+        Authenticates the user and attaches the user instance to attrs['user'].
+        """
         email = attrs.get('email')
         password = attrs.get('password')
         username = User.objects.get(email=email).username
@@ -67,6 +85,9 @@ class LoginSerializer(serializers.Serializer):
         return attrs
     
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Read-only user representation exposing id, fullname, and email.
+    """
     fullname = serializers.CharField(source= 'username')
     class Meta:
         model = User
@@ -74,9 +95,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CheckUserEmial(serializers.Serializer):
+    """
+    Serializer for validating an email and resolving it to an existing user.
+    """
     email= serializers.EmailField()
 
     def validate(self, attrs):
+        """
+        Validates the email format and existence, then attaches the user to attrs['user'].
+        """
         email = attrs.get('email')
         user = User.objects.filter(email=email).first()
 
