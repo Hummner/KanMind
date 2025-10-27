@@ -44,7 +44,6 @@ class TasksSerializer(ModelSerializer):
         model = Tasks
         fields = ['id', 'board', 'title', 'description', 'status', 'priority', 'assignee', 'reviewer', 'due_date', 'comments_count', 'assignee_id', 'reviewer_id']
         read_only_fields = ['id', 'comments_count']
-        write_only_fields = ['board']
 
     def get_comments_count(self, obj):
         return obj.comments.count()
@@ -97,6 +96,8 @@ class TasksSerializer(ModelSerializer):
         board = self.get_board_from_request()
         reviewer = attrs.get('reviewer')
         assignee = attrs.get('assignee')
+
+        attrs['board'] = board
 
         if not board.members.filter(pk=reviewer.id).exists():
             raise serializers.ValidationError('The reviewer must be a board member.')
