@@ -112,7 +112,8 @@ class TasksSerializer(ModelSerializer):
         Prevents changing the board during update and delegates the rest to the parent update method.
         """
 
-        board = validated_data.get('board', None)
+        req = self.context['request']
+        board = req.data.get('board', None)
 
         if board:
             raise serializers.ValidationError('Board can not change')
