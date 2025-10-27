@@ -12,6 +12,7 @@ from rest_framework import serializers
 from boards.models import Boards
 from .permissions import IsMember, IsTaskOrBoardOwner, IsCommentAuthor
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 
 
 class TasksViewSet(ModelViewSet):
@@ -114,6 +115,6 @@ class CommentsView(ModelViewSet):
         else:
             raise serializers.ValidationError(serializer.errors)
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

@@ -6,6 +6,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
 
 
 
@@ -20,17 +21,15 @@ class RegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         
 
-        if serializer.is_valid():
-            user =  serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
-            data = {
+        serializer.is_valid(raise_exception=True)
+        user =  serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        data = {
                     "token": token.key,
                     "fullname": user.username,
                     "email": user.email,
                     "user_id": user.id
                 }
-        else:
-            data = serializer.errors
         return Response(data)
     
 class LoginView(ObtainAuthToken):
@@ -63,6 +62,7 @@ class UserEmailCheck(APIView):
     Checks if a user with the given email exists and returns their basic information.
     Requires authentication.
     """
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
 

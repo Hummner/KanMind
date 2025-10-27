@@ -12,7 +12,7 @@ comments_router.register(r'comments', CommentsView)
 
 urlpatterns = [
     path('assigned-to-me/', TaskAssignedToUserView.as_view()),
-    path('reviewer/', TaskReviewerView.as_view()),
+    path('reviewing/', TaskReviewerView.as_view()),
     path('', include(router.urls)),
     path('', include(comments_router.urls))
     

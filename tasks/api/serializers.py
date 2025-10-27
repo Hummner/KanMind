@@ -127,6 +127,8 @@ class AddCommentSerializer(serializers.ModelSerializer):
         return Comment.objects.create(author=author, task=task, **validated_data)
     
 class CommentSerializer(serializers.ModelSerializer):
+
+    author = serializers.StringRelatedField()
         
     class Meta:
         model = Comment

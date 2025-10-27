@@ -17,6 +17,15 @@ class BoardViewSet(viewsets.ModelViewSet):
     queryset = Boards.objects.all()
     serializer_class = BoardsSeralizer
     authentication_classes = [TokenAuthentication]
+    permission_classes =[IsAuthenticated, IsBoardOwnerOrMember]
+
+
+    
+    # def get_object(self):
+    #     obj = super().get_object()  # DRF normálisan is ezt hívja
+    #     # Biztos, ami biztos: kényszerítsük az object-perm ellenőrzést
+    #     self.check_object_permissions(self.request, obj)
+    #     return obj
 
 
     def get_queryset(self):
@@ -32,9 +41,12 @@ class BoardViewSet(viewsets.ModelViewSet):
                 "tasks__assignee", "tasks__reviewer"
             )
         
-        return Boards.objects.filter(
-                Q(owner=user) | Q(members=user)
-            ).distinct()
+        if self.action == 'list':
+            return Boards.objects.filter(
+                    Q(owner=user) | Q(members=user)
+                ).distinct()
+
+        return Boards.objects.all()
         
     
     def get_permissions(self):
