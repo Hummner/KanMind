@@ -37,6 +37,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Username already exists')
         return value
     
+    def validate(self, attrs):
+
+        allowed_fields = set(self.fields.keys())
+        incomming_fields = set(self.initial_data.keys())
+
+        extra_fields = incomming_fields - allowed_fields
+        if extra_fields:
+            raise serializers.ValidationError({k: "Unerwartetes Feld." for k in extra_fields})
+        return attrs
+    
+
+    
 
     def save(self, **kwargs):
         """
