@@ -30,7 +30,7 @@ class RegistrationView(APIView):
                     "email": user.email,
                     "user_id": user.id
                 }
-        return Response(data)
+        return Response(data, status=status.HTTP_201_CREATED)
     
 class LoginView(ObtainAuthToken):
     """
