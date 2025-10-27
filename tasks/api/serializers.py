@@ -4,9 +4,21 @@ from tasks.models import Tasks, Comment
 from django.contrib.auth.models import User
 from auth_app.api.serializers import UserSerializer
 from boards.models import Boards
+from rest_framework.exceptions import NotFound
 
 
+class BoardFKSerializer(serializers.PrimaryKeyRelatedField):
 
+    def get_queryset(self):
+        return Boards.objects.all()
+
+
+    def to_internal_value(self, data):
+        try:
+            
+            self.get_queryset().get(pk=data)
+        except Boards.DoesNotExist:
+            raise NotFound(f"Board with id '{data}' not found.")
 
 class TasksSerializer(ModelSerializer):
 
@@ -26,11 +38,13 @@ class TasksSerializer(ModelSerializer):
     )
 
     comments_count = serializers.SerializerMethodField()
+    board = BoardFKSerializer()
 
     class Meta:
         model = Tasks
         fields = ['id', 'board', 'title', 'description', 'status', 'priority', 'assignee', 'reviewer', 'due_date', 'comments_count', 'assignee_id', 'reviewer_id']
         read_only_fields = ['id', 'comments_count']
+        write_only_fields = ['board']
 
     def get_comments_count(self, obj):
         return obj.comments.count()

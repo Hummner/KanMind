@@ -20,14 +20,6 @@ class BoardViewSet(viewsets.ModelViewSet):
     permission_classes =[IsAuthenticated, IsBoardOwnerOrMember]
 
 
-    
-    # def get_object(self):
-    #     obj = super().get_object()  # DRF normálisan is ezt hívja
-    #     # Biztos, ami biztos: kényszerítsük az object-perm ellenőrzést
-    #     self.check_object_permissions(self.request, obj)
-    #     return obj
-
-
     def get_queryset(self):
         """
         Returns the queryset of boards.
