@@ -80,7 +80,14 @@ class LoginSerializer(serializers.Serializer):
         """
         email = attrs.get('email')
         password = attrs.get('password')
-        username = User.objects.get(email=email).username
+        is_a_user = User.objects.filter(email=email).exists()
+        username = None
+
+        if is_a_user:
+            username = User.objects.get(email=email).username
+        else:
+             msg = 'Email address is not found'
+             raise serializers.ValidationError(msg, code='authorization')
 
         if email and password and username:
             user = authenticate(request=self.context.get('request'),
