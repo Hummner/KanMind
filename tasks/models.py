@@ -24,6 +24,9 @@ class Tasks(models.Model):
     board = models.ForeignKey(Boards, on_delete=models.CASCADE, related_name='tasks')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='taks_owner')
 
+    class Meta:
+        verbose_name = 'Task'
+
 
 class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -34,3 +37,6 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.author.username
+    
+    class Meta:
+        verbose_name = 'Comment'
